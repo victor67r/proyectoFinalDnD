@@ -1,0 +1,30 @@
+07/10 VICTOR: Lo que he hecho es básicamente crear las carpetas y la estructura básica del backend con SpringBoot. 
+Para que os hagáis una idea de lo que es springboot es esto: 
+
+Spring Boot va a ser la parte del proyecto que se encargue de toda la lógica del servidor. El frontend será lo que vea y utilice el usuario, pero Spring Boot será el encargado de recibir las peticiones, procesar la información, comunicarse con la base de datos y devolver los resultados.
+
+Por ejemplo, cuando un jugador cree un personaje desde la aplicación, el frontend enviará una petición al backend. Spring Boot recibirá esa petición, comprobará los datos y podrá guardarlos en MySQL. Después devolverá una respuesta al frontend.
+
+La comunicación quedaría más o menos así:
+
+Frontend (React)
+↓
+REST API
+↓
+Spring Boot
+↓
+JPA
+↓
+MySQL
+
+Y la estructura del SB es la siguiente: 
+
+controller: recibirá las peticiones del frontend.
+
+service: contendrá la lógica de negocio.
+
+repository: se encargará de comunicarse con la base de datos mediante JPA.
+
+entity: contendrá las clases que representan los datos de nuestra aplicación, como usuarios, personajes o partidas.
+
+config: tendrá las configuraciones necesarias del backend.
