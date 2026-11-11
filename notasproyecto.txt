@@ -28,3 +28,43 @@ repository: se encargará de comunicarse con la base de datos mediante JPA.
 entity: contendrá las clases que representan los datos de nuestra aplicación, como usuarios, personajes o partidas.
 
 config: tendrá las configuraciones necesarias del backend.
+
+
+22/20: Victor.
+
+1. Sistema de lanzamiento de dados
+
+He creado DadoController.java en el paquete controller. Este controlador implementa el endpoint GET /api/dados/{caras}, que recibe el número de caras del dado y genera un resultado aleatorio entre 1 y ese número, devolviéndolo en formato JSON.
+
+Esta funcionalidad permite automatizar las tiradas de dados de las partidas de Dungeons & Dragons y que el frontend pueda solicitar resultados al backend.
+
+2. DTO de participantes
+
+He creado ParticipanteDTO.java en el paquete dto, utilizando un DTO (Data Transfer Object) para transportar los datos de cada participante. Contiene dos campos: nombre y tirada, que identifican al participante y su resultado de iniciativa.
+
+Se utiliza un DTO porque solo necesitamos recibir y devolver estos datos, sin crear una entidad nueva ni almacenarlos en la base de datos.
+
+3. Sistema de ordenación de iniciativa
+
+He creado IniciativaController.java en el paquete controller, con el endpoint POST /api/iniciativa/ordenar. Este recibe una lista de participantes en formato JSON, los ordena de mayor a menor según su tirada y devuelve la lista ordenada.
+
+Por ejemplo, si el Guerrero obtiene un 15, el Goblin un 20 y el Mago un 12, el resultado coloca primero al Goblin, después al Guerrero y finalmente al Mago.
+
+Esta funcionalidad automatiza el orden de actuación durante los combates y facilita la gestión de los turnos.
+
+
+11/11 : Victor
+
+Gestión de partidas:
+Actualicé Partida.java para guardar el código de cada sala, el DM que la crea y los jugadores que participan en ella. Para registrar a los jugadores añadí una relación muchos a muchos, que Hibernate creó en la tabla intermedia partida_jugadores.
+
+Después modifiqué PartidaRepository para comprobar si un código de sala ya existe. También creé PartidaService, donde implementé la lógica para buscar al DM, generar códigos únicos con el formato DND-XXXX y guardar cada partida vinculada a su creador. Añadí además la lógica para que un jugador pueda unirse con el código de sala, validando que la sala y el usuario existan y evitando que el DM se una como jugador o que alguien se una dos veces.
+
+Por último, actualicé PartidaController con los endpoints para crear una sala y unirse a ella. Probé el proceso con Postman: registré un DM y un jugador, creé la sala DND-4085 y envié la petición para que el jugador se uniera. La respuesta indicó que había un jugador en la sala y confirmé en MySQL que la tabla partida_jugadores relacionaba la partida con el jugador.
+
+Preparación de WebSockets:
+Añadí al pom.xml la dependencia spring-boot-starter-websocket para incorporar soporte de WebSockets en el backend.
+
+Después creé WebSocketConfig para habilitar la comunicación mediante STOMP y SockJS. Configuré /ws como punto de conexión, /app como prefijo de los mensajes que recibe el servidor y /topic como prefijo de los canales a los que se suscriben los clientes.
+
+También creé TiempoRealController con dos canales iniciales. En /app/dados, el servidor recibe el número de caras y devuelve una tirada en /topic/dados. En /app/iniciativa, recibe una lista de participantes, la ordena según sus tiradas y publica el resultado en /topic/iniciativa.
