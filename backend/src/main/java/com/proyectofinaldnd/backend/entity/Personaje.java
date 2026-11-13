@@ -28,16 +28,6 @@ public class Personaje {
     @Column(nullable = false)
     private Integer armadura;
 
-    // Clave foránea al jugador propietario
-    @ManyToOne
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario usuario;
-
-    // Clave foránea a la partida donde se está jugando
-    @ManyToOne
-    @JoinColumn(name = "id_partida")
-    private Partida partida;
-
     public Personaje() {}
 
     // Genera aquí los Getters y Setters para todos los campos (id, nombre, clase, raza, hpActual, hpMax, armadura)
@@ -92,22 +82,4 @@ public class Personaje {
     public void setArmadura(Integer armadura) {
         this.armadura = armadura;
     }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public Partida getPartida() {
-        return partida;
-    }
-
-    public void setPartida(Partida partida) {
-        this.partida = partida;
-    }
-
-    
 }
