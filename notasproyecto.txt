@@ -68,3 +68,8 @@ Añadí al pom.xml la dependencia spring-boot-starter-websocket para incorporar 
 Después creé WebSocketConfig para habilitar la comunicación mediante STOMP y SockJS. Configuré /ws como punto de conexión, /app como prefijo de los mensajes que recibe el servidor y /topic como prefijo de los canales a los que se suscriben los clientes.
 
 También creé TiempoRealController con dos canales iniciales. En /app/dados, el servidor recibe el número de caras y devuelve una tirada en /topic/dados. En /app/iniciativa, recibe una lista de participantes, la ordena según sus tiradas y publica el resultado en /topic/iniciativa.
+
+15/11
+He creado test: 
+1. El primer test comprueba que las tiradas de dados de 2, 6 y 20 caras siempre quedan dentro del rango permitido. El segundo verifica que los valores menores que 2 se rechazan.
+2. Estos tests verifican el orden descendente, que los empates conservan el orden de entrada y que la lista vacía no produce errores.
