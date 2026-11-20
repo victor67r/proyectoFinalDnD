@@ -3,6 +3,10 @@ import './App.css'
 
 function App() {
   const [modo, setModo] = useState('login')
+  const [pantalla, setPantalla] = useState('acceso')
+  const [codigoSala, setCodigoSala] = useState('')
+  const [errorSala, setErrorSala] = useState('')
+
   const esRegistro = modo === 'registro'
 
   const [formulario, setFormulario] = useState({
@@ -72,7 +76,122 @@ function App() {
       return
     }
 
-    setMensaje('Los datos son válidos. Aún falta conectarlos con el servidor.')
+    // Navegación provisional: todavía no se comprueba la cuenta en el backend.
+    setMensaje('')
+    setPantalla('salas')
+  }
+
+  function unirseComoJugador(evento) {
+    evento.preventDefault()
+
+    const codigoNormalizado = codigoSala.trim().toUpperCase()
+
+    if (!codigoNormalizado) {
+      setErrorSala('Introduce el código de la sala.')
+      return
+    }
+
+    // Navegación provisional: todavía no se valida el código con el backend.
+    setErrorSala('')
+    setCodigoSala(codigoNormalizado)
+    setPantalla('vista-jugador')
+  }
+
+  if (pantalla === 'salas') {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <header className="auth-header">
+            <div className="auth-emblem" aria-hidden="true">✦</div>
+            <p className="auth-kicker">Crónicas de la mesa</p>
+            <h1>Elige cómo jugar</h1>
+            <p className="auth-description">
+              Crea una partida como Dungeon Master o únete a una sala existente.
+            </p>
+          </header>
+
+          <div className="auth-form">
+            <button
+              className="auth-submit"
+              type="button"
+              onClick={() => setPantalla('panel-dm')}
+            >
+              Crear sala como DM
+            </button>
+
+            <form
+              className="auth-form"
+              onSubmit={unirseComoJugador}
+              noValidate
+            >
+              <div className="form-field">
+                <label htmlFor="codigoSala">Código de sala</label>
+                <input
+                  id="codigoSala"
+                  name="codigoSala"
+                  type="text"
+                  value={codigoSala}
+                  onChange={(evento) => {
+                    setCodigoSala(evento.target.value.toUpperCase())
+                    setErrorSala('')
+                  }}
+                  placeholder="DND-1234"
+                  maxLength={8}
+                  aria-invalid={Boolean(errorSala)}
+                  aria-describedby={errorSala ? 'codigoSala-error' : undefined}
+                />
+                {errorSala && (
+                  <span className="field-error" id="codigoSala-error">
+                    {errorSala}
+                  </span>
+                )}
+              </div>
+
+              <button className="auth-submit" type="submit">
+                Unirme como jugador
+              </button>
+            </form>
+
+            <button
+              className="auth-tab"
+              type="button"
+              onClick={() => setPantalla('acceso')}
+            >
+              Volver al acceso
+            </button>
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  if (pantalla === 'panel-dm' || pantalla === 'vista-jugador') {
+    const esDm = pantalla === 'panel-dm'
+
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <header className="auth-header">
+            <div className="auth-emblem" aria-hidden="true">✦</div>
+            <p className="auth-kicker">Crónicas de la mesa</p>
+            <h1>{esDm ? 'Panel del Dungeon Master' : 'Vista del jugador'}</h1>
+            <p className="auth-description">
+              {esDm
+                ? 'Aquí irá el panel para gestionar tu partida.'
+                : `Aquí irá la vista del jugador${codigoSala ? ` en ${codigoSala}` : ''}.`}
+            </p>
+          </header>
+
+          <button
+            className="auth-submit"
+            type="button"
+            onClick={() => setPantalla('salas')}
+          >
+            Volver a selección de sala
+          </button>
+        </section>
+      </main>
+    )
   }
 
   return (
