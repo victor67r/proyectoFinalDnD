@@ -73,3 +73,13 @@ También creé TiempoRealController con dos canales iniciales. En /app/dados, el
 He creado test: 
 1. El primer test comprueba que las tiradas de dados de 2, 6 y 20 caras siempre quedan dentro del rango permitido. El segundo verifica que los valores menores que 2 se rechazan.
 2. Estos tests verifican el orden descendente, que los empates conservan el orden de entrada y que la lista vacía no produce errores.
+
+20/11 
+Pantalla de Login y Registro
+He creado una interfaz de autenticación. En App.jsx añadí un estado llamado modo para alternar entre Iniciar sesión y Crear cuenta. Según el modo activo, React muestra u oculta el campo del nombre y el de confirmación de contraseña.
+
+Los campos del formulario están controlados por React: sus valores se guardan en el estado formulario y se actualizan al escribir. También añadí validaciones en el envío: se comprueba que el email no esté vacío y tenga un formato válido, que la contraseña esté escrita y, durante el registro, que haya un nombre y ambas contraseñas coincidan. Los errores aparecen junto a los campos correspondientes; si los datos pasan las comprobaciones, se muestra un mensaje indicando que son válidos.
+
+Para el aspecto visual, reemplacé los estilos globales de la plantilla en index.css y definí los estilos específicos del formulario en App.css. Apliqué una paleta oscura con detalles dorados, estados visuales para los campos y botones, y ajustes responsivos para que la tarjeta se adapte a pantallas estrechas.
+
+La interfaz y las validaciones están preparadas en el frontend, pero el formulario todavía no envía los datos al backend. Queda probar los distintos casos en el navegador y conectar el registro y el inicio de sesión con sus endpoints.
