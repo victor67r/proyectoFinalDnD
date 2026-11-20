@@ -12,6 +12,9 @@ function App() {
     confirmarPassword: '',
   })
 
+  const [errores, setErrores] = useState({})
+  const [mensaje, setMensaje] = useState('')
+
   function cambiarCampo(evento) {
     const { name, value } = evento.target
 
@@ -19,11 +22,57 @@ function App() {
       ...actual,
       [name]: value,
     }))
+
+    setErrores((actual) => ({
+      ...actual,
+      [name]: '',
+    }))
+
+    setMensaje('')
+  }
+
+  function cambiarModo(nuevoModo) {
+    setModo(nuevoModo)
+    setErrores({})
+    setMensaje('')
   }
 
   function enviarFormulario(evento) {
     evento.preventDefault()
-    // Añadiremos validaciones y conexión con el backend después.
+
+    const nuevosErrores = {}
+    const emailLimpio = formulario.email.trim()
+    const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    if (!emailLimpio) {
+      nuevosErrores.email = 'Introduce tu correo electrónico.'
+    } else if (!formatoEmail.test(emailLimpio)) {
+      nuevosErrores.email = 'Escribe un correo electrónico válido.'
+    }
+
+    if (!formulario.password) {
+      nuevosErrores.password = 'Introduce tu contraseña.'
+    }
+
+    if (esRegistro && !formulario.nombre.trim()) {
+      nuevosErrores.nombre = 'Introduce tu nombre de aventurero.'
+    }
+
+    if (
+      esRegistro &&
+      formulario.password !== formulario.confirmarPassword
+    ) {
+      nuevosErrores.confirmarPassword = 'Las contraseñas no coinciden.'
+    }
+
+    setErrores(nuevosErrores)
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      setMensaje('')
+      return
+    }
+
+    setMensaje('Los datos son válidos. Aún falta conectarlos con el servidor.')
   }
 
   return (
@@ -46,7 +95,7 @@ function App() {
             role="tab"
             aria-selected={!esRegistro}
             className={!esRegistro ? 'auth-tab active' : 'auth-tab'}
-            onClick={() => setModo('login')}
+            onClick={() => cambiarModo('login')}
           >
             Iniciar sesión
           </button>
@@ -56,13 +105,13 @@ function App() {
             role="tab"
             aria-selected={esRegistro}
             className={esRegistro ? 'auth-tab active' : 'auth-tab'}
-            onClick={() => setModo('registro')}
+            onClick={() => cambiarModo('registro')}
           >
             Crear cuenta
           </button>
         </div>
 
-        <form className="auth-form" onSubmit={enviarFormulario}>
+        <form className="auth-form" onSubmit={enviarFormulario} noValidate>
           {esRegistro && (
             <div className="form-field">
               <label htmlFor="nombre">Nombre de aventurero</label>
@@ -74,8 +123,14 @@ function App() {
                 onChange={cambiarCampo}
                 autoComplete="name"
                 placeholder="Cómo te llamas"
-                required
+                aria-invalid={Boolean(errores.nombre)}
+                aria-describedby={errores.nombre ? 'nombre-error' : undefined}
               />
+              {errores.nombre && (
+                <span className="field-error" id="nombre-error">
+                  {errores.nombre}
+                </span>
+              )}
             </div>
           )}
 
@@ -89,8 +144,14 @@ function App() {
               onChange={cambiarCampo}
               autoComplete="email"
               placeholder="aventurero@ejemplo.com"
-              required
+              aria-invalid={Boolean(errores.email)}
+              aria-describedby={errores.email ? 'email-error' : undefined}
             />
+            {errores.email && (
+              <span className="field-error" id="email-error">
+                {errores.email}
+              </span>
+            )}
           </div>
 
           <div className="form-field">
@@ -103,8 +164,14 @@ function App() {
               onChange={cambiarCampo}
               autoComplete={esRegistro ? 'new-password' : 'current-password'}
               placeholder="Introduce tu contraseña"
-              required
+              aria-invalid={Boolean(errores.password)}
+              aria-describedby={errores.password ? 'password-error' : undefined}
             />
+            {errores.password && (
+              <span className="field-error" id="password-error">
+                {errores.password}
+              </span>
+            )}
           </div>
 
           {esRegistro && (
@@ -118,14 +185,30 @@ function App() {
                 onChange={cambiarCampo}
                 autoComplete="new-password"
                 placeholder="Escribe la contraseña otra vez"
-                required
+                aria-invalid={Boolean(errores.confirmarPassword)}
+                aria-describedby={
+                  errores.confirmarPassword
+                    ? 'confirmarPassword-error'
+                    : undefined
+                }
               />
+              {errores.confirmarPassword && (
+                <span className="field-error" id="confirmarPassword-error">
+                  {errores.confirmarPassword}
+                </span>
+              )}
             </div>
           )}
 
           <button className="auth-submit" type="submit">
             {esRegistro ? 'Crear cuenta' : 'Entrar en la partida'}
           </button>
+
+          {mensaje && (
+            <p className="auth-message" role="status">
+              {mensaje}
+            </p>
+          )}
         </form>
 
         <p className="auth-footer">
