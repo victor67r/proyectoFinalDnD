@@ -9,12 +9,122 @@
   --sombra: rgba(0, 0, 0, .38);
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
   color: var(--blanco);
-  background: radial-gradient(ellipse at top, #292333 0%, #17151d 48%, #111018 100%);
+  background: #050506;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
-body { min-height: 100vh; }
+body {
+  min-height: 100vh;
+  background: #050506;
+}
+#root {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+.geometric-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: .7;
+}
+.geometric-backdrop svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.app-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.geo-lines,
+.geo-shape,
+.geo-ring {
+  fill: none;
+  stroke: rgba(240, 240, 245, .3);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.geo-lines { stroke: rgba(240, 240, 245, .1); }
+.geo-ring { stroke: rgba(245, 245, 250, .24); }
+.geo-ring--dashed { stroke-dasharray: 2 9; }
+.geo-shape { stroke: url(#geo-metal); }
+.geo-shape--bright { stroke: rgba(255, 255, 255, .72); }
+.geo-dot { fill: #fff; filter: drop-shadow(0 0 7px rgba(255, 255, 255, .9)); }
+.geo-halo { opacity: .22; }
+.geo-orbit,
+.geo-float {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.geo-orbit--slow { animation: geo-orbit 54s linear infinite; }
+.geo-orbit--reverse { animation: geo-orbit 68s linear infinite reverse; }
+.geo-float--one { animation: geo-float 19s ease-in-out infinite alternate; }
+.geo-float--two { animation: geo-float 24s ease-in-out -8s infinite alternate-reverse; }
+@keyframes geo-orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes geo-float {
+  from { transform: translate3d(-12px, 8px, 0) rotate(-8deg); }
+  to { transform: translate3d(14px, -18px, 0) rotate(9deg); }
+}
+#root::before,
+#root::after {
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  content: '';
+}
+#root::before {
+  background:
+    radial-gradient(ellipse 34% 30% at 24% 32%, rgba(220, 220, 225, .62), rgba(132, 132, 140, .3) 38%, transparent 72%),
+    radial-gradient(ellipse 28% 36% at 72% 38%, rgba(72, 72, 80, .56), rgba(24, 24, 28, .24) 48%, transparent 70%),
+    radial-gradient(ellipse 38% 30% at 52% 72%, rgba(205, 205, 212, .46), rgba(54, 54, 60, .28) 42%, transparent 72%);
+  animation: liquid-drift 32s ease-in-out infinite alternate;
+  will-change: transform, opacity, filter;
+}
+#root::after {
+  background: linear-gradient(118deg, transparent 38%, rgba(255, 255, 255, .12) 49%, transparent 60%);
+  mask-image: radial-gradient(ellipse at center, #000 12%, transparent 76%);
+  animation: liquid-sheen 17s ease-in-out infinite alternate;
+}
+@keyframes liquid-drift {
+  0% {
+    transform: translate3d(-20%, -12%, 0) rotate(-12deg) scale(.9);
+    filter: blur(96px) contrast(1.02);
+    opacity: .24;
+  }
+  50% {
+    transform: translate3d(10%, 8%, 0) rotate(6deg) scale(1.03);
+    filter: blur(68px) contrast(1.08);
+    opacity: .52;
+  }
+  100% {
+    transform: translate3d(20%, 14%, 0) rotate(14deg) scale(.92);
+    filter: blur(100px) contrast(1.02);
+    opacity: .28;
+  }
+}
+@keyframes liquid-sheen {
+  from { transform: translate3d(-4%, 1%, 0) rotate(-5deg); opacity: .12; }
+  to { transform: translate3d(4%, -1%, 0) rotate(5deg); opacity: .72; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #root::before,
+  #root::after,
+  .geo-orbit,
+  .geo-float { animation: none; }
+}
 button { font: inherit; }
 h2 { font-family: 'Spectral', serif; font-weight: 800; font-size: 1.7rem; margin: 0; letter-spacing: .02em; color: var(--oro); text-shadow: 0 2px 12px rgba(216, 184, 120, .12); }
 

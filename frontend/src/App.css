@@ -6,10 +6,7 @@
   padding: 32px 16px;
   place-items: center;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at 15% 20%, rgba(100, 58, 38, 0.28), transparent 35%),
-    radial-gradient(ellipse at 85% 80%, rgba(125, 91, 38, 0.16), transparent 36%),
-    linear-gradient(145deg, #111419, #191a18 55%, #101216);
+  background: transparent;
 }
 
 .auth-page::before,
