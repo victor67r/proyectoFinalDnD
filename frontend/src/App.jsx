@@ -1,164 +1,353 @@
-import { useEffect, useRef, useState } from 'react'
-import CharacterCard from './components/CharacterCard'
-import InitiativeTracker from './components/InitiativeTracker'
-import DiceRoller from './components/DiceRoller'
+import { useState } from 'react'
+import './App.css'
+import GameBoard from './components/GameBoard'
 
-const ORDEN_INICIAL = ['personaje', 'goblin', 'iniciativa']
-const CLAVE = 'orden-paneles'
-const PANELES = [
-  { id: 'personaje', nombre: 'Personaje' },
-  { id: 'goblin', nombre: 'Goblin' },
-  { id: 'iniciativa', nombre: 'Iniciativa' },
-  { id: 'dados', nombre: 'Dados' },
-]
+function App() {
+  const [modo, setModo] = useState('login')
+  const [pantalla, setPantalla] = useState('acceso')
+  const [codigoSala, setCodigoSala] = useState('')
+  const [errorSala, setErrorSala] = useState('')
 
-function cargarOrden() {
-  try {
-    const o = JSON.parse(localStorage.getItem(CLAVE))
-    if (!Array.isArray(o)) return ORDEN_INICIAL
-    const migrados = o.map((id) => {
-      if (id === 'aliado') return 'personaje'
-      if (id.startsWith('enemigo-')) return 'goblin'
-      return id
-    })
-    const permitidos = new Set(PANELES.map(({ id }) => id))
-    const unicos = [...new Set(migrados.filter((id) => permitidos.has(id)))]
-    return unicos.length ? unicos : ORDEN_INICIAL
-  } catch { /* sin orden guardado */ }
-  return ORDEN_INICIAL
-}
+  const esRegistro = modo === 'registro'
 
-function guardarOrden(orden) {
-  try { localStorage.setItem(CLAVE, JSON.stringify(orden)) } catch { /* ignorar */ }
-}
+  const [formulario, setFormulario] = useState({
+    nombre: '',
+    email: '',
+    password: '',
+    confirmarPassword: '',
+  })
 
-// Posición destino al mover con teclado dentro de la rejilla 2x2
-function destino(i, tecla) {
-  if (tecla === 'ArrowLeft' && i % 2 === 1) return i - 1
-  if (tecla === 'ArrowRight' && i % 2 === 0) return i + 1
-  if (tecla === 'ArrowUp' && i >= 2) return i - 2
-  if (tecla === 'ArrowDown' && i < 2) return i + 2
-  return null
-}
+  const [errores, setErrores] = useState({})
+  const [mensaje, setMensaje] = useState('')
 
-export default function App() {
-  const [orden, setOrden] = useState(cargarOrden)
-  const [arrastrando, setArrastrando] = useState(null)
-  const [sobre, setSobre] = useState(null)
-  const [mostrarOpciones, setMostrarOpciones] = useState(false)
-  const foco = useRef(null)
+  function cambiarCampo(evento) {
+    const { name, value } = evento.target
 
-  useEffect(() => {
-    if (foco.current) {
-      document.querySelector(`[data-asa="${foco.current}"]`)?.focus()
-      foco.current = null
+    setFormulario((actual) => ({
+      ...actual,
+      [name]: value,
+    }))
+
+    setErrores((actual) => ({
+      ...actual,
+      [name]: '',
+    }))
+
+    setMensaje('')
+  }
+
+  function cambiarModo(nuevoModo) {
+    setModo(nuevoModo)
+    setErrores({})
+    setMensaje('')
+  }
+
+  function enviarFormulario(evento) {
+    evento.preventDefault()
+
+    const nuevosErrores = {}
+    const emailLimpio = formulario.email.trim()
+    const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    if (!emailLimpio) {
+      nuevosErrores.email = 'Introduce tu correo electrónico.'
+    } else if (!formatoEmail.test(emailLimpio)) {
+      nuevosErrores.email = 'Escribe un correo electrónico válido.'
     }
-  }, [orden])
 
-  const intercambiar = (a, b) => {
-    if (!a || !b || a === b) return
-    const o = [...orden]
-    const i = o.indexOf(a)
-    const j = o.indexOf(b)
-    ;[o[i], o[j]] = [o[j], o[i]]
-    setOrden(o)
-    guardarOrden(o)
+    if (!formulario.password) {
+      nuevosErrores.password = 'Introduce tu contraseña.'
+    }
+
+    if (esRegistro && !formulario.nombre.trim()) {
+      nuevosErrores.nombre = 'Introduce tu nombre de aventurero.'
+    }
+
+    if (
+      esRegistro &&
+      formulario.password !== formulario.confirmarPassword
+    ) {
+      nuevosErrores.confirmarPassword = 'Las contraseñas no coinciden.'
+    }
+
+    setErrores(nuevosErrores)
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      setMensaje('')
+      return
+    }
+
+    setMensaje('')
+    setPantalla('salas')
   }
 
-  const terminar = () => { setArrastrando(null); setSobre(null) }
+  function unirseComoJugador(evento) {
+    evento.preventDefault()
 
-  const anadirPanel = (id) => {
-    const siguiente = [...orden, id]
-    setOrden(siguiente)
-    guardarOrden(siguiente)
-    setMostrarOpciones(false)
+    const codigoNormalizado = codigoSala.trim().toUpperCase()
+
+    if (!codigoNormalizado) {
+      setErrorSala('Introduce el código de la sala.')
+      return
+    }
+
+    setErrorSala('')
+    setCodigoSala(codigoNormalizado)
+    setPantalla('vista-jugador')
   }
 
-  const quitarPanel = (id) => {
-    const siguiente = orden.filter((panelId) => panelId !== id)
-    setOrden(siguiente)
-    guardarOrden(siguiente)
+  if (pantalla === 'salas') {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <header className="auth-header">
+            <div className="auth-emblem" aria-hidden="true">✦</div>
+            <p className="auth-kicker">Crónicas de la mesa</p>
+            <h1>Elige cómo jugar</h1>
+            <p className="auth-description">
+              Crea una partida como Dungeon Master o únete a una sala existente.
+            </p>
+          </header>
+
+          <div className="auth-form">
+            <button
+              className="auth-submit"
+              type="button"
+              onClick={() => setPantalla('panel-dm')}
+            >
+              Crear sala como DM
+            </button>
+
+            <form
+              className="auth-form"
+              onSubmit={unirseComoJugador}
+              noValidate
+            >
+              <div className="form-field">
+                <label htmlFor="codigoSala">Código de sala</label>
+                <input
+                  id="codigoSala"
+                  name="codigoSala"
+                  type="text"
+                  value={codigoSala}
+                  onChange={(evento) => {
+                    setCodigoSala(evento.target.value.toUpperCase())
+                    setErrorSala('')
+                  }}
+                  placeholder="DND-1234"
+                  maxLength={8}
+                  aria-invalid={Boolean(errorSala)}
+                  aria-describedby={errorSala ? 'codigoSala-error' : undefined}
+                />
+                {errorSala && (
+                  <span className="field-error" id="codigoSala-error">
+                    {errorSala}
+                  </span>
+                )}
+              </div>
+
+              <button className="auth-submit" type="submit">
+                Unirme como jugador
+              </button>
+            </form>
+
+            <button
+              className="auth-tab"
+              type="button"
+              onClick={() => setPantalla('acceso')}
+            >
+              Volver al acceso
+            </button>
+          </div>
+        </section>
+      </main>
+    )
   }
 
-  const alTeclado = (e, id) => {
-    const j = destino(orden.indexOf(id), e.key)
-    if (j === null) return
-    e.preventDefault()
-    foco.current = id
-    intercambiar(id, orden[j])
+  if (pantalla === 'panel-dm') {
+    return (
+      <>
+        <button
+          className="auth-tab back-to-rooms"
+          type="button"
+          onClick={() => setPantalla('salas')}
+        >
+          Volver a selección de sala
+        </button>
+        <GameBoard />
+      </>
+    )
+  }
+
+  if (pantalla === 'vista-jugador') {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <header className="auth-header">
+            <div className="auth-emblem" aria-hidden="true">✦</div>
+            <p className="auth-kicker">Crónicas de la mesa</p>
+            <h1>Vista del jugador</h1>
+            <p className="auth-description">
+              Aquí irá la vista del jugador{codigoSala ? ` en ${codigoSala}` : ''}.
+            </p>
+          </header>
+
+          <button
+            className="auth-submit"
+            type="button"
+            onClick={() => setPantalla('salas')}
+          >
+            Volver a selección de sala
+          </button>
+        </section>
+      </main>
+    )
   }
 
   return (
-    <main className="grid">
-      <div className="controles-paneles">
-        <button
-          className="btn pequeno"
-          type="button"
-          aria-expanded={mostrarOpciones}
-          aria-controls="opciones-paneles"
-          onClick={() => setMostrarOpciones((mostrar) => !mostrar)}
-        >
-          {mostrarOpciones ? 'Cerrar' : '+ Añadir panel'}
-        </button>
-        {mostrarOpciones && (
-          <div className="opciones-paneles" id="opciones-paneles" aria-label="Paneles disponibles">
-            {PANELES.filter(({ id }) => !orden.includes(id)).map(({ id, nombre }) => (
-              <button key={id} className="btn pequeno" type="button" onClick={() => anadirPanel(id)}>
-                + {nombre}
-              </button>
-            ))}
-            {PANELES.every(({ id }) => orden.includes(id)) && (
-              <span className="demo">Ya están añadidos todos los paneles.</span>
+    <main className="auth-page">
+      <section className="auth-card">
+        <header className="auth-header">
+          <div className="auth-emblem" aria-hidden="true">✦</div>
+          <p className="auth-kicker">Crónicas de la mesa</p>
+          <h1>{esRegistro ? 'Crea tu cuenta' : 'Bienvenido de nuevo'}</h1>
+          <p className="auth-description">
+            {esRegistro
+              ? 'Prepara tu personaje y únete a la aventura.'
+              : 'Tu próxima aventura te está esperando.'}
+          </p>
+        </header>
+
+        <div className="auth-tabs" role="tablist" aria-label="Acceso">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={!esRegistro}
+            className={!esRegistro ? 'auth-tab active' : 'auth-tab'}
+            onClick={() => cambiarModo('login')}
+          >
+            Iniciar sesión
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={esRegistro}
+            className={esRegistro ? 'auth-tab active' : 'auth-tab'}
+            onClick={() => cambiarModo('registro')}
+          >
+            Crear cuenta
+          </button>
+        </div>
+
+        <form className="auth-form" onSubmit={enviarFormulario} noValidate>
+          {esRegistro && (
+            <div className="form-field">
+              <label htmlFor="nombre">Nombre de aventurero</label>
+              <input
+                id="nombre"
+                name="nombre"
+                type="text"
+                value={formulario.nombre}
+                onChange={cambiarCampo}
+                autoComplete="name"
+                placeholder="Cómo te llamas"
+                aria-invalid={Boolean(errores.nombre)}
+                aria-describedby={errores.nombre ? 'nombre-error' : undefined}
+              />
+              {errores.nombre && (
+                <span className="field-error" id="nombre-error">
+                  {errores.nombre}
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="form-field">
+            <label htmlFor="email">Correo electrónico</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={formulario.email}
+              onChange={cambiarCampo}
+              autoComplete="email"
+              placeholder="aventurero@ejemplo.com"
+              aria-invalid={Boolean(errores.email)}
+              aria-describedby={errores.email ? 'email-error' : undefined}
+            />
+            {errores.email && (
+              <span className="field-error" id="email-error">
+                {errores.email}
+              </span>
             )}
           </div>
-        )}
-      </div>
-      {orden.map((id) => (
-        <div
-          key={id}
-          className={`celda${arrastrando === id ? ' arrastrando' : ''}${sobre === id && arrastrando !== id ? ' destino' : ''}`}
-          onDragOver={(e) => { e.preventDefault(); setSobre(id) }}
-          onDrop={(e) => { e.preventDefault(); intercambiar(arrastrando, id); terminar() }}
-        >
-          <div
-            className="asa"
-            role="button"
-            tabIndex={0}
-            draggable
-            data-asa={id}
-            aria-label={`Mover panel ${id}. Arrastra o usa las flechas del teclado.`}
-            title="Arrastra para intercambiar de sitio"
-            onDragStart={(e) => {
-              e.dataTransfer.effectAllowed = 'move'
-              e.dataTransfer.setData('text/plain', id)
-              e.dataTransfer.setDragImage(e.currentTarget.parentElement, 24, 24)
-              setArrastrando(id)
-            }}
-            onDragEnd={terminar}
-            onKeyDown={(e) => alTeclado(e, id)}
-          >
-            <svg viewBox="0 0 24 8" aria-hidden="true">
-              {[4, 12, 20].map((x) => (<g key={x}><circle cx={x} cy="2" r="1.4" /><circle cx={x} cy="6" r="1.4" /></g>))}
-            </svg>
+
+          <div className="form-field">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={formulario.password}
+              onChange={cambiarCampo}
+              autoComplete={esRegistro ? 'new-password' : 'current-password'}
+              placeholder="Introduce tu contraseña"
+              aria-invalid={Boolean(errores.password)}
+              aria-describedby={errores.password ? 'password-error' : undefined}
+            />
+            {errores.password && (
+              <span className="field-error" id="password-error">
+                {errores.password}
+              </span>
+            )}
           </div>
-          <button
-            className="btn quitar-panel"
-            type="button"
-            aria-label={`Quitar panel ${PANELES.find((panel) => panel.id === id)?.nombre}`}
-            title="Quitar panel"
-            onClick={() => quitarPanel(id)}
-          >
+
+          {esRegistro && (
+            <div className="form-field">
+              <label htmlFor="confirmarPassword">Repite la contraseña</label>
+              <input
+                id="confirmarPassword"
+                name="confirmarPassword"
+                type="password"
+                value={formulario.confirmarPassword}
+                onChange={cambiarCampo}
+                autoComplete="new-password"
+                placeholder="Escribe la contraseña otra vez"
+                aria-invalid={Boolean(errores.confirmarPassword)}
+                aria-describedby={
+                  errores.confirmarPassword
+                    ? 'confirmarPassword-error'
+                    : undefined
+                }
+              />
+              {errores.confirmarPassword && (
+                <span className="field-error" id="confirmarPassword-error">
+                  {errores.confirmarPassword}
+                </span>
+              )}
+            </div>
+          )}
+
+          <button className="auth-submit" type="submit">
+            {esRegistro ? 'Crear cuenta' : 'Entrar en la partida'}
           </button>
-          {id === 'personaje' && (
-            <CharacterCard tipo="personajes" bando="aliado" fichaId={1} colorId="personaje" />
+
+          {mensaje && (
+            <p className="auth-message" role="status">
+              {mensaje}
+            </p>
           )}
-          {id === 'goblin' && (
-            <CharacterCard tipo="monstruos" bando="enemigo" fichaId={1} colorId="goblin" />
-          )}
-          {id === 'iniciativa' && <InitiativeTracker />}
-          {id === 'dados' && <DiceRoller />}
-        </div>
-      ))}
+        </form>
+
+        <p className="auth-footer">
+          {esRegistro
+            ? 'Al crear una cuenta, comienza tu aventura.'
+            : '¿Aún no tienes cuenta? Usa “Crear cuenta” para registrarte.'}
+        </p>
+      </section>
     </main>
   )
 }
+
+export default App
