@@ -97,6 +97,11 @@ export default function GameBoard() {
 
   return (
     <main className="grid">
+      <header className="tablero-header">
+        <p className="tablero-kicker"><span aria-hidden="true">✦</span> Crónicas de la mesa <span aria-hidden="true">✦</span></p>
+        <h1>La mesa de aventura</h1>
+        <p>Que los dados decidan el destino.</p>
+      </header>
       <div className="controles-paneles">
         <button
           className="btn pequeno"

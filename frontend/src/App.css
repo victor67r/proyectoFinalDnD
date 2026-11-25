@@ -226,3 +226,177 @@
   background: #1b1922;
   color: #f2e9d8;
 }
+
+.tablero-header {
+  grid-column: 1 / -1;
+  padding: .5rem 1rem 1rem;
+  text-align: center;
+}
+
+.tablero-kicker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .75rem;
+  margin: 0 0 .35rem;
+  color: #c5a768;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.tablero-kicker span {
+  color: #e4c477;
+  text-shadow: 0 0 14px rgba(228, 196, 119, .8);
+}
+
+.tablero-header h1 {
+  margin: 0;
+  color: #f5ecd8;
+  font-family: 'Spectral', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: -.035em;
+  text-shadow: 0 4px 28px rgba(201, 162, 84, .22);
+}
+
+.tablero-header > p:last-child {
+  margin: .35rem 0 0;
+  color: #b4ad9e;
+  font-size: .9rem;
+  letter-spacing: .04em;
+}
+
+.grid {
+  gap: 1.1rem;
+  grid-auto-rows: auto;
+  padding: 1.2rem clamp(1rem, 4vw, 3.5rem) 2rem;
+}
+
+.controles-paneles {
+  position: relative;
+  top: auto;
+  left: auto;
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: -.25rem 0 .15rem;
+  transform: none;
+}
+
+.celda {
+  min-height: 20rem;
+}
+
+.opciones-paneles {
+  border-color: rgba(197, 163, 92, .35);
+  border-radius: 10px;
+  background: rgba(25, 26, 24, .94);
+  backdrop-filter: blur(14px);
+}
+
+.panel {
+  overflow: hidden;
+  border: 1px solid rgba(204, 169, 104, .3);
+  border-top: 2px solid rgba(201, 162, 84, .72);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 50% 0, rgba(201, 162, 84, .09), transparent 58%),
+    linear-gradient(155deg, rgba(36, 37, 31, .97), rgba(25, 26, 24, .97) 70%);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .035);
+  backdrop-filter: blur(12px);
+}
+
+.panel:hover {
+  border-color: rgba(228, 196, 119, .55);
+  box-shadow: 0 22px 58px rgba(0, 0, 0, .35), 0 0 28px rgba(201, 162, 84, .08);
+  transform: translateY(-2px);
+}
+
+.panel.enemigo {
+  border-top: 3px double rgba(201, 162, 84, .8);
+}
+
+.cabecera h2,
+.panel > h2 {
+  color: #e4c477;
+  text-shadow: 0 2px 18px rgba(201, 162, 84, .2);
+}
+
+.asa {
+  color: #c5a768;
+}
+
+.asa:hover,
+.asa:focus-visible {
+  color: #f0d58e;
+}
+
+.quitar-panel {
+  border-radius: 50%;
+}
+
+.quitar-panel:hover:not(:disabled) {
+  border-color: rgba(228, 196, 119, .45);
+  background: rgba(201, 162, 84, .13);
+  color: #f0d58e;
+}
+
+.selector-color,
+.escudo svg {
+  border-color: rgba(201, 162, 84, .5);
+}
+
+.escudo svg {
+  fill: #171813;
+  stroke: #e4c477;
+  filter: drop-shadow(0 3px 10px rgba(201, 162, 84, .16));
+}
+
+.barra {
+  height: .85rem;
+  border-color: rgba(201, 162, 84, .65);
+  background: rgba(10, 11, 9, .8);
+}
+
+.btn {
+  border-color: rgba(204, 169, 104, .46);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.btn.primario,
+.btn.dado {
+  background: linear-gradient(180deg, #c6a45c, #a9823d);
+  color: #191710;
+}
+
+.btn.primario:hover:not(:disabled),
+.btn.dado:hover:not(:disabled) {
+  border-color: #e4c477;
+  background: transparent;
+  color: #e4c477;
+}
+
+.registro {
+  border-color: rgba(204, 169, 104, .24);
+  border-radius: 9px;
+  background: rgba(13, 14, 12, .58);
+}
+
+.lista li {
+  border-color: rgba(204, 169, 104, .18);
+}
+
+.lista li strong {
+  color: #e4c477;
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    gap: .9rem;
+    padding: 1rem 1rem 1.5rem;
+  }
+}
